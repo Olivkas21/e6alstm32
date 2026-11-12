@@ -6,30 +6,30 @@
 #include "dma.h"
 #include "button.h"
 
-// ПЕРЕКЛЮЧАТЕЛЬ ЛАБОРАТОРНЫХ: 4, 5 или 6
-#define RUN_LAB 6 
+// switch
+#define RUN_LAB 4 
 
 int main(void) {
-    System_Init(); // Внутри уже есть RCC, GPIO и настройка PC13
-    __enable_irq(); //глобальные прерывания
+    System_Init(); //RCC, GPIO + button PC13
+    __enable_irq(); //nado prosto vkluchit preryvaniya, chtoby rabotalo DMA and UART
 
     #if RUN_LAB == 4
-        // ================= ЛАБОРАТОРНАЯ 4 =================
-        // Задание: Настроить ШИМ и менять скважность на 5% каждые 100 мс
+        // lb4
+        // need to do shim + 5% 
         PWM_Init();
         
         uint8_t duty_lab4 = 0;
         while(1) {
             PWM_SetDuty(duty_lab4);
-            duty_lab4 += 5;
-            if (duty_lab4 > 100) duty_lab4 = 0;
+            duty_lab4 += 1;
+            if (duty_lab4 > 50) duty_lab4 = 0;
             
-            // Простая задержка ~100 мс для 16 МГц
-            for(volatile int i = 0; i < 1600000; i++); 
+            //задержка для 16 МГц
+            for(volatile int i = 0; i < 16000000; i++); 
         }
 
         #elif RUN_LAB == 5
-        // ================= ЛАБОРАТОРНАЯ 5 (ОТЛАДКА UART) =================
+        // lb5 UART
         PWM_Init();
         USART2_Init();
 
@@ -49,24 +49,24 @@ int main(void) {
                 else if (idx5 > 0) {
                     packet5[idx5++] = c;
                     
-                    if (idx5 >= 8) { // Ждем 8 байт
+                    if (idx5 >= 8) { // need 8 biet
                         idx5 = 0; 
                         
-                        // 1. Проверяем XOR
+                        // 1. check XOR
                         uint8_t xor_sum = 0;
                         for(int i = 1; i < 7; i++) xor_sum ^= packet5[i];
                         
-                        // 2. Выводим отладку: пришел ли пакет и сошелся ли XOR
+                        // 2. check in cmd: paket her? and ok XOR or not
                         USART2_SendChar('P'); // Packet received
                         if (xor_sum == packet5[7]) {
                             USART2_SendChar('+'); // XOR OK
                             
                             uint8_t cmd = packet5[1];
                             if (cmd == 0x02) {
-                                // Показываем, какое значение скважности пришло
+                                // nomber skvagnosti
                                 USART2_SendChar('D');
                                 USART2_SendChar('=');
-                                // Выводим число как символы (для простоты, если оно от 0 до 100)
+                                // nombers 0 - 100
                                 if (packet5[2] >= 100) {
                                     USART2_SendChar('1'); USART2_SendChar('0'); USART2_SendChar('0');
                                 } else {
@@ -79,7 +79,7 @@ int main(void) {
                                 PWM_SetDuty(packet5[2]);
                             }
                             
-                            // Эхо (8 байт)
+                            // eho (8 biet)
                             for(int i=0; i<8; i++) USART2_SendChar(packet5[i]);
                         } else {
                             USART2_SendChar('-'); // XOR FAIL
@@ -90,8 +90,8 @@ int main(void) {
             }
         }
     #elif RUN_LAB == 6
-        // ================= ЛАБОРАТОРНАЯ 6 =================
-        // Задание: Берем ЛР5, добавляем DMA (0xAC/0xAB) и кнопку
+        //lr6
+        //lr5+ DMA (0xAC/0xAB) + button
         PWM_Init();
         USART2_Init();
         DMA_Init();
@@ -121,11 +121,11 @@ int main(void) {
                             uint8_t cmd = packet6[1];
                             
                             if (cmd == 0xAC) { 
-                                // Команда запуска DMA (БЕЗ ЭХА по заданию)
+                                // comand to start DMA (with not use eho)
                                 DMA_Start();
                             }
                             else if (cmd == 0xAB) {
-                                // Команда остановки DMA (С ЭХОМ)
+                                // comand to stop DMA (with eho)
                                 DMA_Stop();
                                 for(int i=0; i<7; i++) USART2_SendChar(packet6[i]);
                             }
@@ -143,7 +143,7 @@ int main(void) {
                                 for(int i=0; i<7; i++) USART2_SendChar(packet6[i]);
                             }
                             else {
-                                // Эхо для остальных команд
+                                // eho fom more comand
                                 for(int i=0; i<7; i++) USART2_SendChar(packet6[i]);
                             }
                         }

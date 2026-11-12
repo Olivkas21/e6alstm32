@@ -33,7 +33,7 @@ void DMA_Init(void) {
     //DMA work when we take button
 }
 
-// [ИЗМЕНЕНО МНОЙ] Вынес запуск в функцию, чтобы вызывать и по кнопке, и по UART
+// funktion for work with use button/UART
 void DMA_Start(void) {
     // reload if schetchik work before
     DMA1_Stream6->CR &= ~(0x1 << 0); 
@@ -43,7 +43,7 @@ void DMA_Start(void) {
     DMA1_Stream6->CR |= (0x1 << 0); // go stream
 }
 
-// [ИЗМЕНЕНО МНОЙ] Функция остановки DMA
+//funktion to stop DMA
 void DMA_Stop(void) {
     DMA1_Stream6->CR &= ~(0x1 << 0);
 }
