@@ -6,8 +6,8 @@ void PWM_Init(void) {
     // Предделитель: 16 МГц / (PSC+1) = 10 кГц (стр. 364)
     TIM2->PSC = 1599; 
     
-    // Период: 10 кГц / (ARR+1) = 100 Гц (стр. 364)
-    TIM2->ARR = 99;  
+    // Период: 10 кГц / (ARR+1) = 10 Гц (стр. 364)
+    TIM2->ARR = 999;  
     
     // скважность 50%: CCR1 = 500 из 1000 (стр. 365)
     TIM2->CCR1 = 500; 
@@ -32,9 +32,9 @@ void PWM_Init(void) {
 void PWM_SetDuty(uint8_t duty) {
     if (duty > 100) duty = 100;
     // CCR1 = (ARR * duty) / 100. 
-    //  ARR=99 и duty=50 -> 99*50/10 = 499 (половина)
+    //  ARR=99 и duty=50 -> 999*50/100 = 499 (половина)
     // (стр. 365) CCR1 - регистр сравнения, меняем скважность на лету
-    TIM2->CCR1 = (TIM2->ARR * duty) / 5; // TIM2
+    TIM2->CCR1 = (TIM2->ARR * duty) / 100; // TIM2
 }
 
 // funktion for set freq (chastota) in Hz

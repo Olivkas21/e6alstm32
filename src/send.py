@@ -5,9 +5,7 @@ PORT = '/dev/ttyACM0'
 BAUD = 9600
 while(1 == 1):
     for i in range(0, 100, 10):
-        # --- МЕНЯЙ ЭТО ЗНАЧЕНИЕ ---
         duty_percent = i  # от 0 до 100
-        # --------------------------
 
         packet = [0x7C, 0x02, duty_percent, 0x00, 0x00, 0x00, 0x01]
         xor_sum = 0

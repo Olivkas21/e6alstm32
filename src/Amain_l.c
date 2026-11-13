@@ -7,7 +7,7 @@
 #include "button.h"
 
 // switch
-#define RUN_LAB 4 
+#define RUN_LAB 6 
 
 int main(void) {
     System_Init(); //RCC, GPIO + button PC13
